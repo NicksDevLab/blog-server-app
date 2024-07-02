@@ -56,15 +56,27 @@ describe('Testing api for blogs', () => {
   describe('addition of a new blog.', () => {
 
     test('a valid blog can be added', async () => {
+
+      const loginUser = {
+        username: 'root',
+        password: 'sekret'
+      }
+      
+      const loginResponse = await api
+        .post('/api/login')
+        .send(loginUser)
+
       const newBlog = {
         title: "new blog",
         author: "my Name",
         url: "newUrl",
-        likes: 4,
-        userId: "6681ffb941ac7a4cc2652b45"
+        likes: 0,
+        userId: loginResponse._body.id
       }
+
       await api
         .post('/api/blogs')
+        .set({ 'Authorization': `Bearer ${loginResponse._body.token}` })
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -77,14 +89,26 @@ describe('Testing api for blogs', () => {
     })
 
     test('blog without title is not added', async () => {
+
+      const loginUser = {
+        username: 'root',
+        password: 'sekret'
+      }
+      
+      const loginResponse = await api
+        .post('/api/login')
+        .send(loginUser)
+
       const newBlog = {
         author: "bad Name",
         url: "badUrl",
-        likes: 0
+        likes: 0,
+        userId: loginResponse._body.id
       }
 
       await api
         .post('/api/blogs')
+        .set({ 'authorization': `Bearer ${loginResponse._body.token}` })
         .send(newBlog)
         .expect(400)
 
@@ -169,8 +193,21 @@ describe('Testing api for users', () => {
       const usernames = usersAtEnd.map(u => u.username)
       assert(usernames.includes(newUser.username))
     })
+
+    test('should respond with a JWT token for valid credentials', async () => {
+      const response = await api
+        .post('/api/login')
+        .send({
+          username: 'root',
+          password: 'sekret'
+        })
+        .expect(200)
+      
+      assert(response._body['token'])
+    })
   })
 })
+
 
 after(async () => {
   await mongoose.connection.close()

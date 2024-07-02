@@ -1,6 +1,17 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
+
+// const initialUsers = [
+//   { 
+//     username: 'root', 
+//     name: 'Superuser', 
+//     passwordHash, 
+//     blogs: [] 
+//   },
+
+// ]
+
 const initialBlogs = [
   {
     title: "String1",
